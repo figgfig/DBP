@@ -41,7 +41,7 @@ npm start            # then press i (iOS simulator), a (Android emulator), or sc
 
 With no `.env` file the app runs in **demo mode** with sample sessions, a sample portfolio, and sample proof galleries. Sign in with any email and the code `123456`. Demo images are black-and-white placeholders from picsum.photos and must be replaced with real photographs before release.
 
-To run against the real backend, copy `.env.example` to `.env` and fill in the Supabase URL and anon key. See `docs/SETUP.md`.
+Step-by-step phone testing instructions are in `docs/TESTING.md`. To run against the real backend, copy `.env.example` to `.env` and fill in the Supabase URL and anon key. See `docs/SETUP.md`.
 
 ## Checks
 
