@@ -185,7 +185,11 @@ create table if not exists proof_orders (
   id uuid primary key default gen_random_uuid(),
   gallery_id uuid not null references galleries (id) on delete cascade,
   user_id uuid references auth.users (id) on delete set null,
-  items jsonb not null,                  -- [{ proofId, label, size, quantity }]
+  -- Each item is either a single print or a composite:
+  --   { "kind": "print", "proofId", "label", "size", "quantity" }   (one row per proof per size)
+  --   { "kind": "composite", "id", "templateId", "templateName", "size", "quantity",
+  --     "slots": [{ "slotId", "proofId", "label" }] }
+  items jsonb not null,
   notes text,
   status text not null default 'new',
   created_at timestamptz not null default now()

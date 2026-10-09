@@ -60,13 +60,18 @@ export default function GalleryScreen() {
             </AppText>
           ) : null}
           <AppText color="textSecondary" style={styles.help}>
-            Tap a proof to view it full screen. Mark favorites with the heart, then tap Order to send your selections to the studio.
+            Tap a proof to view it full screen. Mark favorites with the heart. Tap Order to choose sizes, or Composite to arrange several proofs on one print.
           </AppText>
           <View style={styles.actions}>
             <Button
               title={favoriteCount > 0 ? `Order (${favoriteCount} favorites)` : 'Order prints'}
               onPress={() => router.push({ pathname: '/order', params: { galleryId: id } })}
               style={styles.flex}
+            />
+            <Button
+              title="Composite"
+              variant="secondary"
+              onPress={() => router.push({ pathname: '/composite', params: { galleryId: id } })}
             />
             {gallery.data.priceSheetUrl ? (
               <Button title="Price sheet" variant="secondary" onPress={() => WebBrowser.openBrowserAsync(gallery.data!.priceSheetUrl!)} />

@@ -45,6 +45,7 @@ export default function RootLayout() {
               options={{ title: '', presentation: 'fullScreenModal', headerShown: false }}
             />
             <Stack.Screen name="order" options={{ title: 'Order Prints', presentation: 'modal' }} />
+            <Stack.Screen name="composite" options={{ title: 'Create a Composite', presentation: 'modal' }} />
             <Stack.Screen name="login" options={{ title: 'Client Sign In', presentation: 'modal' }} />
             <Stack.Screen name="about" options={{ title: 'About DuBose' }} />
             <Stack.Screen name="pricing" options={{ title: 'Sessions & Pricing' }} />

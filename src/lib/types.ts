@@ -103,8 +103,32 @@ export interface ClientUser {
   name?: string;
 }
 
+/** One print of a single proof at one size. The same proof may appear once per size. */
+export interface PrintOrderItem {
+  kind: 'print';
+  proofId: string;
+  label: string;
+  size: string;
+  quantity: number;
+}
+
+/** A composite: several proofs arranged in one of the studio's templates. */
+export interface CompositeOrderItem {
+  kind: 'composite';
+  /** Client-side id so a composite can be edited before the order is sent. */
+  id: string;
+  templateId: string;
+  templateName: string;
+  size: string;
+  quantity: number;
+  /** Proof chosen for each template slot, in slot order. */
+  slots: { slotId: string; proofId: string; label: string }[];
+}
+
+export type OrderItem = PrintOrderItem | CompositeOrderItem;
+
 export interface ProofOrderRequest {
   galleryId: string;
-  items: { proofId: string; label: string; size: string; quantity: number }[];
+  items: OrderItem[];
   notes?: string;
 }

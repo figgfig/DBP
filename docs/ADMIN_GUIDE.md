@@ -43,7 +43,7 @@ Bulk uploads: the Supabase CLI (`supabase storage cp -r ./proofs/<gallery id> ss
 ## Read favorites and orders
 
 - **favorites** lists which proofs each client hearted (`user_id` joins to Authentication → Users for the email).
-- **proof_orders** holds submitted orders. `items` is a list of `{ label, size, quantity }`. Set `status` to `invoiced`, `printed`, or `delivered` as you work through them.
+- **proof_orders** holds submitted orders. Each entry in `items` is either a single print (`kind: print` with the proof label, size, and quantity; the same proof appears once per size ordered) or a composite (`kind: composite` with the template name, size, quantity, and the proof chosen for each spot in order). Set `status` to `invoiced`, `printed`, or `delivered` as you work through them.
 
 ## Update the portfolio
 

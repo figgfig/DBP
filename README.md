@@ -1,5 +1,7 @@
 # DuBose Photography — iOS & Android app
 
+**Picking this up? Start with `docs/HANDOFF.md`.**
+
 A client app for [DuBose Photography](https://www.dubosephotography.com), the Charleston studio known for classic black and white vignetted portraits of children. Built with Expo (React Native) so one codebase ships to the Apple App Store and Google Play.
 
 ## What clients can do
@@ -9,7 +11,7 @@ A client app for [DuBose Photography](https://www.dubosephotography.com), the Ch
 | **Home** | Studio hero, quick links, the next upcoming sessions, and an About teaser. |
 | **Calendar** | Every Spring and Fall travel session by city, with hostess contact, sitting fee, minimum order, open 15-minute times, and a request form (or waitlist when a city is full). |
 | **Gallery** | The studio's portfolio, filterable by single images, composites, and siblings, with a full-screen viewer. |
-| **My Proofs** | Passwordless client sign-in (one-time email code). Clients see their proof galleries, swipe through proofs full screen, mark favorites, open the price sheet, and send a print order. |
+| **My Proofs** | Passwordless client sign-in (one-time email code). Clients see their proof galleries, swipe through proofs full screen, mark favorites, open the price sheet, order each proof in several sizes, build composites from their proofs, and send the order. |
 | **More** | About DuBose, Sessions & Pricing, Payments, Contact (tap to call, email, or open maps), Host a Session application, My Reservations, website, blog, and Facebook. |
 
 ## Project layout
