@@ -24,13 +24,15 @@ No Apple Developer or Google Play membership is needed to test. Those are only r
 5. In the terminal, inside the `DBP` folder:
 
    ```
-   npm start
+   npm run phone
    ```
+
+   This starts the app through a secure tunnel, so the phone does not need to be on the same Wi-Fi and the Windows firewall cannot block it. (`npm start` also works, but only when the phone and PC share a network that allows them to talk.)
 
 6. Scan the QR code. iPhone: use the Camera app. Android: open Expo Go and tap **Scan QR code**.
 7. The app loads on the phone. Sign in on **My Proofs** with any email and the code `123456` (demo mode). Code changes reload on the phone automatically.
 
-If the QR code scans but nothing loads, the network is blocking phone-to-PC traffic. Press Ctrl+C and run `npx expo start --tunnel` instead.
+If the phone shows "incompatible with this version of Expo Go", update Expo Go from the app store. If PowerShell says scripts are disabled, run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once.
 
 ## Other ways to test
 
