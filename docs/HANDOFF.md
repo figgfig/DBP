@@ -20,7 +20,7 @@ Read this first if you are picking up the project (person or Claude session). Al
 1. **Phone testing.** `npm run phone` starts a tunnel for Expo Go. Last report: Expo Go showed "Failed to download remote update". Next steps are in `docs/TESTING.md`; if it persists, try `npx expo start --lan --clear` on a Private Wi-Fi network.
 2. **Real composite templates.** Replace the four starter layouts in `src/lib/composites.ts` with the studio's templates (format in `docs/COMPOSITES.md`).
 3. **Real prices and sizes.** Enter the studio's price list in the `price_lists` table (`docs/ADMIN_GUIDE.md`). Print sizes in the order screen come from that list. Demo mode uses clearly fake sample prices in `src/lib/api/demo.ts`.
-4. **Real photos.** Hero, About portrait, and Gallery use grayscale placeholders from picsum.photos (`src/app/(tabs)/index.tsx`, `src/app/about.tsx`, `src/lib/api/demo.ts`). Swap in studio images and completed composites.
+4. **Real photos.** Hero and Gallery use grayscale placeholders from picsum.photos (`src/app/(tabs)/index.tsx`, `src/lib/api/demo.ts`). The About page shows the first three Gallery images. Swap in studio images and completed composites.
 5. **Website copy check.** Studio text in `src/lib/content.ts` was taken from search-indexed pages of dubosephotography.com because the cloud session could not reach the site. Verify against the live site, including the calendar and hostess names. Two hostess emails are `hostess@example.com` placeholders.
 6. **Backend.** Create a Supabase project and follow `docs/SETUP.md`.
 7. **Store accounts.** Apple Developer ($99/yr) and Google Play ($25) are only needed to publish. See `docs/STORE_SUBMISSION.md`.

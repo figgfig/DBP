@@ -1,3 +1,5 @@
+import type { Ionicons } from '@expo/vector-icons';
+
 /**
  * Static studio content. Everything here mirrors what is published on
  * dubosephotography.com so the app and the website say the same thing.
@@ -30,13 +32,36 @@ export const Studio = {
 };
 
 export const About = {
-  heading: 'About DuBose',
+  heading: 'About the Studio',
+  eyebrow: 'Charleston, South Carolina · Since 1977',
+  intro:
+    'DuBose Photography is a Charleston children’s portrait studio specializing in the classic black and white vignetted style created in the earliest days of photography.',
   paragraphs: [
-    'DuBose Photography specializes in the classic black and white vignetted style of portraiture created in the earlier days of photography.',
-    'DuBose Blakeney is a self-trained photographer and has been creating memorable images since 1977. His angelic portraits of children are displayed around the world, and their timeless look will take you back to days gone by.',
-    'A native Charlestonian, DuBose enjoys spending time with his family in the charm-filled Holy City.',
-    'DuBose travels around the Southeast providing children’s photography shoots, scheduling travel sessions during the Spring and Fall months. He photographs children from 6 months to 16 years.',
+    'Since 1977, the studio has created timeless portraits of children that are now displayed in homes around the world.',
+    'Each Spring and Fall, the studio travels to cities across the Southeast. Local hostesses organize every session, so families can be photographed close to home.',
   ],
+  highlights: [
+    {
+      icon: 'contrast-outline',
+      title: 'Classic black & white',
+      body: 'Soft, vignetted portraits with a timeless, heirloom look.',
+    },
+    {
+      icon: 'map-outline',
+      title: 'Sessions across the Southeast',
+      body: 'Travel sessions every Spring and Fall, hosted locally in each city.',
+    },
+    {
+      icon: 'happy-outline',
+      title: 'Children 6 months to 16 years',
+      body: 'A private 15-minute session for each family, with each child photographed separately.',
+    },
+    {
+      icon: 'images-outline',
+      title: 'Single images and composites',
+      body: 'Order individual portraits, or several poses arranged together on one print.',
+    },
+  ] satisfies { icon: keyof typeof Ionicons.glyphMap; title: string; body: string }[],
 };
 
 export const SessionInfo = {

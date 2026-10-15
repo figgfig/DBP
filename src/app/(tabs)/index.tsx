@@ -101,9 +101,9 @@ export default function HomeScreen() {
           upcoming.map((s) => <SessionCard key={s.id} session={s} />)
         )}
 
-        <SectionHeader eyebrow="The Studio" title="About DuBose" actionLabel="Read more" onAction={() => router.push('/about')} />
+        <SectionHeader eyebrow="The Studio" title="About the Studio" actionLabel="Read more" onAction={() => router.push('/about')} />
         <Card onPress={() => router.push('/about')}>
-          <AppText color="textSecondary">{About.paragraphs[1]}</AppText>
+          <AppText color="textSecondary">{About.intro}</AppText>
         </Card>
       </View>
     </Screen>
