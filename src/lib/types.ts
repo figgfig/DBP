@@ -12,8 +12,6 @@ export interface PhotoSession {
   startDate: string;
   /** ISO date of the last day (same as startDate for one-day sessions). */
   endDate: string;
-  sittingFee: number;
-  minimumOrder: number;
   status: SessionStatus;
   notes?: string;
   hostesses: Hostess[];
@@ -65,6 +63,17 @@ export interface HostessApplication {
   message?: string;
 }
 
+/**
+ * Prices for one gallery's order. Only ever loaded for a signed-in client who
+ * owns the gallery: prices are never shown anywhere else in the app.
+ */
+export interface PriceList {
+  /** Single print price by size, e.g. { "8x10": 55 }. The key order is the order sizes are listed in. */
+  prints: Record<string, number>;
+  /** Composite price by size. */
+  composites: Record<string, number>;
+}
+
 export interface Gallery {
   id: string;
   title: string;
@@ -75,6 +84,7 @@ export interface Gallery {
   /** Ordering deadline shown to the client, if any. */
   orderBy?: string;
   priceSheetUrl?: string;
+  priceList?: PriceList;
   clientEmail?: string;
 }
 

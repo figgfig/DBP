@@ -20,7 +20,7 @@ const SECTIONS: { title: string; rows: Row[] }[] = [
     title: 'The Studio',
     rows: [
       { title: 'About DuBose', icon: 'person-outline', href: '/about' },
-      { title: 'Sessions & Pricing', icon: 'pricetag-outline', href: '/pricing' },
+      { title: 'How Sessions Work', icon: 'information-circle-outline', href: '/pricing' },
       { title: 'Payments', icon: 'cash-outline', href: '/payments' },
       { title: 'Contact', icon: 'call-outline', href: '/contact' },
     ],

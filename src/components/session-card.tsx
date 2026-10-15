@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { formatDateRange, formatMoney } from '@/lib/format';
+import { formatDateRange } from '@/lib/format';
 import type { PhotoSession } from '@/lib/types';
 
 import { Card } from './card';
@@ -24,10 +24,9 @@ export function SessionCard({ session }: { session: PhotoSession }) {
           <AppText variant="heading">
             {session.city}, {session.state}
           </AppText>
-          <AppText variant="caption">
-            {formatMoney(session.sittingFee)} sitting fee per child
-            {session.status === 'open' && openSlots > 0 ? ` · ${openSlots} times open` : ''}
-          </AppText>
+          {session.status === 'open' && openSlots > 0 ? (
+            <AppText variant="caption">{openSlots} times open</AppText>
+          ) : null}
           <View style={styles.badge}>
             <StatusBadge status={session.status} />
           </View>

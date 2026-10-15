@@ -40,6 +40,20 @@ The family opens the app, signs in with that email, and the gallery appears unde
 
 Bulk uploads: the Supabase CLI (`supabase storage cp -r ./proofs/<gallery id> ss:///proofs/<gallery id>`) uploads a whole folder at once, and a short SQL `insert ... select` can create the proof rows from the file list.
 
+## Set prices
+
+Prices are never shown on public screens. A client only sees prices inside the order screen of their own gallery.
+
+1. **Table Editor → price_lists → Insert row**
+   - `name`: for example "Fall 2026"
+   - `prints`: single print price by size, in the order sizes should be listed, e.g. `{"5x7": 35, "8x10": 55, "11x14": 95, "16x20": 175, "20x24": 245}`
+   - `composites`: composite price by size, e.g. `{"8x10": 95, "10x20": 210, "12x24": 275}`
+2. On each gallery, set `price_list_id` to that price list's `id`. One price list can serve many galleries; make a new one when prices change so older galleries keep their original prices.
+
+The sizes a client can order come from `prints`, so adding or removing a size there changes the order screen. Composite sizes come from each template in `src/lib/composites.ts`; give each of those sizes a price in `composites`.
+
+`sitting_fee` and `minimum_order` on `photo_sessions` are for staff reference only. Database permissions stop the app from reading them.
+
 ## Read favorites and orders
 
 - **favorites** lists which proofs each client hearted (`user_id` joins to Authentication → Users for the email).

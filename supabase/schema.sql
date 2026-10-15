@@ -38,6 +38,8 @@ create table if not exists photo_sessions (
   address text,
   start_date date not null,
   end_date date not null,
+  -- Staff-only reference columns. The app never shows prices on public screens,
+  -- and the column grants further down stop clients from reading these.
   sitting_fee numeric(8, 2) not null default 100,
   minimum_order numeric(8, 2) not null default 200,
   status session_status not null default 'open',
@@ -150,6 +152,17 @@ $$;
 -- ---------------------------------------------------------------------------
 -- Client proofs
 -- ---------------------------------------------------------------------------
+
+-- Print and composite prices. A client can only read the price list attached
+-- to a gallery they own, so prices are never visible before proofs arrive.
+create table if not exists price_lists (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,                    -- e.g. "Fall 2026"
+  prints jsonb not null default '{}'::jsonb,      -- { "5x7": 35, "8x10": 55, ... } in display order
+  composites jsonb not null default '{}'::jsonb,  -- { "10x20": 210, ... }
+  created_at timestamptz not null default now()
+);
+
 create table if not exists galleries (
   id uuid primary key default gen_random_uuid(),
   title text not null,
@@ -158,6 +171,7 @@ create table if not exists galleries (
   cover_path text,                       -- path inside the private "proofs" bucket
   price_sheet_path text,                 -- optional PDF in the "proofs" bucket
   order_by date,
+  price_list_id uuid references price_lists (id) on delete set null,
   created_at timestamptz not null default now()
 );
 create index if not exists galleries_client_email_idx on galleries (lower(client_email));
@@ -224,10 +238,26 @@ alter table galleries enable row level security;
 alter table proofs enable row level security;
 alter table favorites enable row level security;
 alter table proof_orders enable row level security;
+alter table price_lists enable row level security;
 
 create policy "staff read own row" on staff for select using (user_id = auth.uid());
 
+create policy "clients read price list of own gallery" on price_lists for select
+  using (
+    is_staff()
+    or exists (
+      select 1 from galleries g
+      where g.price_list_id = price_lists.id
+        and lower(g.client_email) = lower(coalesce(auth.jwt() ->> 'email', ''))
+    )
+  );
+create policy "staff manage price lists" on price_lists for all using (is_staff()) with check (is_staff());
+
 create policy "sessions are public" on photo_sessions for select using (published or is_staff());
+-- Hide fee columns from the app entirely; staff read them in the Supabase dashboard.
+revoke select on photo_sessions from anon, authenticated;
+grant select (id, city, state, venue_name, address, start_date, end_date, status, notes, published, created_at)
+  on photo_sessions to anon, authenticated;
 create policy "staff manage sessions" on photo_sessions for all using (is_staff()) with check (is_staff());
 
 create policy "hostesses are public" on session_hostesses for select using (true);

@@ -8,6 +8,7 @@ import type {
   HostessApplication,
   PhotoSession,
   PortfolioImage,
+  PriceList,
   Proof,
   ProofOrderRequest,
   TimeSlot,
@@ -52,8 +53,6 @@ const sessions: PhotoSession[] = [
     venueName: 'Private residence, Buckhead',
     startDate: '2026-10-16',
     endDate: '2026-10-17',
-    sittingFee: 100,
-    minimumOrder: 200,
     status: 'open',
     notes: 'Indoor session. Exact address is shared by the hostess after your time is confirmed.',
     hostesses: [
@@ -71,8 +70,6 @@ const sessions: PhotoSession[] = [
     state: 'GA',
     startDate: '2026-10-22',
     endDate: '2026-10-22',
-    sittingFee: 100,
-    minimumOrder: 200,
     status: 'waitlist',
     hostesses: [{ name: 'Molly Nobles', email: 'mollyrnobles@gmail.com' }],
     timeSlots: slots('st-simons-2026-10', '2026-10-22', 9, 20, Array.from({ length: 20 }, (_, i) => i)),
@@ -83,8 +80,6 @@ const sessions: PhotoSession[] = [
     state: 'NC',
     startDate: '2026-11-06',
     endDate: '2026-11-06',
-    sittingFee: 100,
-    minimumOrder: 200,
     status: 'open',
     hostesses: [{ name: 'Meredith Chapman', email: 'hostess@example.com' }],
     timeSlots: slots('charlotte-2026-11', '2026-11-06', 10, 16, [0, 5, 6]),
@@ -95,10 +90,8 @@ const sessions: PhotoSession[] = [
     state: 'SC',
     startDate: '2026-11-14',
     endDate: '2026-11-14',
-    sittingFee: 75,
-    minimumOrder: 75,
     status: 'open',
-    notes: 'Home session near the studio. Fee is applied to each child’s order with a $75 minimum per child.',
+    notes: 'Home session near the studio.',
     hostesses: [{ name: 'Studio', email: 'ordersdbp@gmail.com', phone: '(843) 442-4096' }],
     timeSlots: slots('mount-pleasant-2026-11', '2026-11-14', 9, 12, [1]),
   },
@@ -108,8 +101,6 @@ const sessions: PhotoSession[] = [
     state: 'GA',
     startDate: '2027-03-12',
     endDate: '2027-03-12',
-    sittingFee: 100,
-    minimumOrder: 200,
     status: 'open',
     hostesses: [{ name: 'Christina Lake', email: 'christinaelake@gmail.com' }],
     timeSlots: slots('augusta-2027-03', '2027-03-12', 9, 20, []),
@@ -120,8 +111,6 @@ const sessions: PhotoSession[] = [
     state: 'AL',
     startDate: '2027-04-09',
     endDate: '2027-04-10',
-    sittingFee: 100,
-    minimumOrder: 200,
     status: 'open',
     hostesses: [
       { name: 'Mary Coleman Clark', email: 'hostess@example.com' },
@@ -138,8 +127,6 @@ const sessions: PhotoSession[] = [
     state: 'NC',
     startDate: '2026-03-20',
     endDate: '2026-03-20',
-    sittingFee: 100,
-    minimumOrder: 200,
     status: 'past',
     hostesses: [{ name: 'Hostess', email: 'hostess@example.com' }],
     timeSlots: [],
@@ -158,6 +145,12 @@ const portfolio: PortfolioImage[] = [
   { id: 'p9', url: placeholder('dbp-portfolio-9'), caption: 'Single image', category: 'single' },
 ];
 
+// SAMPLE PRICES for demo mode only. Real prices come from the studio's price list in the backend.
+const samplePriceList: PriceList = {
+  prints: { '5x7': 35, '8x10': 55, '11x14': 95, '16x20': 175, '20x24': 245 },
+  composites: { '8x10': 95, '11x14': 150, '16x20': 260, '8x16': 165, '10x20': 210, '12x24': 275 },
+};
+
 const galleries: Gallery[] = [
   {
     id: 'g-2026-spring',
@@ -167,6 +160,7 @@ const galleries: Gallery[] = [
     proofCount: 12,
     orderBy: '2026-11-15',
     clientEmail: 'demo@example.com',
+    priceList: samplePriceList,
   },
   {
     id: 'g-2025-fall',
@@ -175,6 +169,7 @@ const galleries: Gallery[] = [
     coverUrl: placeholder('dbp-proof-g2-1', 400, 533),
     proofCount: 8,
     clientEmail: 'demo@example.com',
+    priceList: samplePriceList,
   },
 ];
 

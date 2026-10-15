@@ -18,30 +18,38 @@ import { api } from '@/lib/api';
 import { cart, useCart } from '@/lib/cart';
 import { getTemplate } from '@/lib/composites';
 import { PrintSizes, Studio } from '@/lib/content';
-import type { CompositeOrderItem, PrintOrderItem, Proof } from '@/lib/types';
+import { formatMoney } from '@/lib/format';
+import type { CompositeOrderItem, Gallery, PrintOrderItem, Proof } from '@/lib/types';
 
 /**
  * Print order. Each proof can be ordered in several sizes at once, and
  * composites built in the composite builder appear alongside single prints.
- * Pricing is on the emailed price sheet, so the studio invoices after review.
+ *
+ * This screen (and the composite builder) are the ONLY places prices appear.
+ * They come from the gallery's price list, which the backend only returns to
+ * the signed-in client who owns the gallery.
  */
 export default function OrderScreen() {
   const theme = useTheme();
   const { galleryId } = useLocalSearchParams<{ galleryId: string }>();
   const { items } = useCart(galleryId);
   const [proofs, setProofs] = useState<Proof[] | null>(null);
+  const [gallery, setGallery] = useState<Gallery | null>(null);
   const [extraProofIds, setExtraProofIds] = useState<string[]>([]);
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    api.listProofs(galleryId).then((all) => {
+    Promise.all([api.listProofs(galleryId), api.getGallery(galleryId)]).then(([all, g]) => {
       setProofs(all);
+      setGallery(g);
+      const sizes = g?.priceList ? Object.keys(g.priceList.prints) : PrintSizes;
+      const defaultSize = sizes.includes('8x10') ? '8x10' : sizes[0];
       cart.seed(
         galleryId,
         all
           .filter((p) => p.isFavorite)
-          .map<PrintOrderItem>((p) => ({ kind: 'print', proofId: p.id, label: p.label, size: PrintSizes[1], quantity: 1 }))
+          .map<PrintOrderItem>((p) => ({ kind: 'print', proofId: p.id, label: p.label, size: defaultSize, quantity: 1 }))
       );
     });
   }, [galleryId]);
@@ -56,6 +64,17 @@ export default function OrderScreen() {
   const totalPrints = prints.reduce((sum, p) => sum + p.quantity, 0);
   const totalComposites = composites.reduce((sum, c) => sum + c.quantity, 0);
   const totalItems = totalPrints + totalComposites;
+
+  const priceList = gallery?.priceList;
+  const printSizes = priceList ? Object.keys(priceList.prints) : PrintSizes;
+  const printPrice = (size: string) => priceList?.prints[size];
+  const compositePrice = (size: string) => priceList?.composites[size];
+  const lineTotals = items.map((i) => {
+    const unit = i.kind === 'print' ? printPrice(i.size) : compositePrice(i.size);
+    return unit === undefined ? undefined : unit * i.quantity;
+  });
+  const estimatedTotal = lineTotals.reduce<number>((sum, t) => sum + (t ?? 0), 0);
+  const unpricedCount = lineTotals.filter((t) => t === undefined).length;
 
   function qtyFor(proofId: string, size: string) {
     return prints.find((p) => p.proofId === proofId && p.size === size)?.quantity ?? 0;
@@ -93,8 +112,10 @@ export default function OrderScreen() {
   return (
     <Screen>
       <AppText color="textSecondary">
-        Order each proof in as many sizes as you like, and build composites from several proofs. Prices are on your price sheet. The
-        studio confirms every order before printing.
+        Order each proof in as many sizes as you like, and build composites from several proofs.{' '}
+        {priceList
+          ? 'Your sitting fee is credited on your invoice. The studio confirms every order before printing.'
+          : 'Prices are on your price sheet. The studio confirms every order before printing.'}
       </AppText>
 
       <SectionHeader eyebrow="Composites" title="Several poses, one print" />
@@ -115,7 +136,10 @@ export default function OrderScreen() {
               <View style={styles.flex}>
                 <AppText variant="subheading">{c.templateName}</AppText>
                 <AppText variant="caption">{c.slots.map((s) => s.label).join(', ')}</AppText>
-                <AppText variant="caption">Size {c.size}</AppText>
+                <AppText variant="caption">
+                  Size {c.size}
+                  {compositePrice(c.size) !== undefined ? ` · ${formatMoney(compositePrice(c.size)!)} each` : ''}
+                </AppText>
               </View>
             </View>
             <View style={styles.compositeActions}>
@@ -160,7 +184,8 @@ export default function OrderScreen() {
         printProofIds.map((proofId) => {
           const proof = proofById.get(proofId);
           if (!proof) return null;
-          const proofTotal = PrintSizes.reduce((sum, s) => sum + qtyFor(proofId, s), 0);
+          const proofTotal = printSizes.reduce((sum, s) => sum + qtyFor(proofId, s), 0);
+          const proofCost = printSizes.reduce((sum, s) => sum + qtyFor(proofId, s) * (printPrice(s) ?? 0), 0);
           return (
             <Card key={proofId}>
               <View style={styles.lineRow}>
@@ -179,18 +204,24 @@ export default function OrderScreen() {
                     </Pressable>
                   </View>
                   <AppText variant="caption">
-                    {proofTotal === 0 ? 'Set a quantity on any size.' : `${proofTotal} print${proofTotal === 1 ? '' : 's'}`}
+                    {proofTotal === 0
+                      ? 'Set a quantity on any size.'
+                      : `${proofTotal} print${proofTotal === 1 ? '' : 's'}${priceList ? ` · ${formatMoney(proofCost)}` : ''}`}
                   </AppText>
                 </View>
               </View>
               <View style={[styles.sizeTable, { borderTopColor: theme.border }]}>
-                {PrintSizes.map((size) => {
+                {printSizes.map((size) => {
                   const qty = qtyFor(proofId, size);
+                  const price = printPrice(size);
                   return (
                     <View key={size} style={styles.sizeRow}>
-                      <AppText style={[styles.flex, qty > 0 ? styles.sizeActive : null]} color={qty > 0 ? 'text' : 'textSecondary'}>
-                        {size}
-                      </AppText>
+                      <View style={styles.flex}>
+                        <AppText style={qty > 0 ? styles.sizeActive : null} color={qty > 0 ? 'text' : 'textSecondary'}>
+                          {size}
+                        </AppText>
+                        {price !== undefined ? <AppText variant="caption">{formatMoney(price)} each</AppText> : null}
+                      </View>
                       <Stepper
                         value={qty}
                         min={0}
@@ -243,6 +274,22 @@ export default function OrderScreen() {
         <AppText color="textSecondary">
           {totalPrints} single print{totalPrints === 1 ? '' : 's'} · {totalComposites} composite{totalComposites === 1 ? '' : 's'}
         </AppText>
+        {priceList && totalItems > 0 ? (
+          <>
+            <View style={styles.totalRow}>
+              <AppText variant="subheading" style={styles.flex}>
+                Estimated total
+              </AppText>
+              <AppText variant="subheading">{formatMoney(estimatedTotal)}</AppText>
+            </View>
+            <AppText variant="caption">
+              {unpricedCount > 0
+                ? `${unpricedCount} item${unpricedCount === 1 ? ' is' : 's are'} priced by the studio. `
+                : ''}
+              Your sitting fee is credited and the studio confirms the final invoice.
+            </AppText>
+          </>
+        ) : null}
       </Card>
       <Button title={`Send order (${totalItems})`} onPress={submit} loading={submitting} disabled={totalItems === 0} />
     </Screen>
@@ -285,6 +332,7 @@ const styles = StyleSheet.create({
   sizeTable: { marginTop: Spacing.sm, paddingTop: Spacing.xs, borderTopWidth: StyleSheet.hairlineWidth },
   sizeRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 4 },
   sizeActive: { fontWeight: '600' },
+  totalRow: { flexDirection: 'row', alignItems: 'center', marginTop: Spacing.sm, marginBottom: Spacing.xs },
   stepper: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   qty: { minWidth: 22, textAlign: 'center' },
   qtyButton: { width: 32, height: 32, borderRadius: 16, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
