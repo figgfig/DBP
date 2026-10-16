@@ -37,8 +37,8 @@ export function formatTime(value: string): string {
 }
 
 export function formatMoney(value: number): string {
-  const cents = Number.isInteger(value) ? 0 : 2;
-  return `$${value.toLocaleString('en-US', { minimumFractionDigits: cents, maximumFractionDigits: cents })}`;
+  const hasCents = Math.round(value * 100) % 100 !== 0;
+  return `$${value.toLocaleString('en-US', { minimumFractionDigits: hasCents ? 2 : 0, maximumFractionDigits: 2 })}`;
 }
 
 export function isUpcoming(dateIso: string): boolean {

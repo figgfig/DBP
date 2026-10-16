@@ -8,6 +8,7 @@ import type {
   HostessApplication,
   PhotoSession,
   PortfolioImage,
+  PriceList,
   Proof,
   ProofOrderRequest,
   TimeSlot,
@@ -59,8 +60,6 @@ const sessions: PhotoSession[] = [
     state: 'GA',
     startDate: '2026-10-01',
     endDate: '2026-10-02',
-    sittingFee: 100,
-    minimumOrder: 200,
     status: 'past',
     notes: SESSION_NOTES,
     hostesses: [{ name: 'Whitney McMurray' }],
@@ -75,8 +74,6 @@ const sessions: PhotoSession[] = [
     state: 'NC',
     startDate: '2026-10-19',
     endDate: '2026-10-20',
-    sittingFee: 100,
-    minimumOrder: 200,
     status: 'open',
     notes: SESSION_NOTES,
     hostesses: [{ name: 'Gatesy Plyler' }],
@@ -91,8 +88,6 @@ const sessions: PhotoSession[] = [
     state: 'NC',
     startDate: '2026-10-21',
     endDate: '2026-10-21',
-    sittingFee: 100,
-    minimumOrder: 200,
     status: 'open',
     notes: SESSION_NOTES,
     hostesses: [{ name: 'Jennifer Estridge' }],
@@ -146,6 +141,75 @@ const galleryInfo = (id: string) => {
   return { coverUrl: set[0]?.thumbnailUrl, proofCount: set.length };
 };
 
+/**
+ * The studio's Spring 2026 price list: what the studio actually charged on its
+ * order forms, with package contents and composite rules from its price lists.
+ * In production this lives in the price_lists table (see supabase/seed.sql) and
+ * only reaches the client who owns the gallery.
+ */
+const studioPriceList: PriceList = {
+  // Single prints are tiered (first print, other poses, reprints), so the studio prices them on the invoice.
+  prints: {},
+  composites: { '8x10': 375, '11x14': 475, '16x20': 795 },
+  compositeExtraChild: 75,
+  packages: [
+    {
+      id: 'package-1',
+      name: 'Package 1',
+      price: 795,
+      contents: [
+        { size: '16x20', quantity: 1 },
+        { size: '8x10', quantity: 1 },
+        { size: '5x7', quantity: 2 },
+      ],
+      summary: 'One 16x20, one 8x10, two 5x7s',
+    },
+    {
+      id: 'package-2',
+      name: 'Package 2',
+      price: 550,
+      contents: [
+        { size: '11x14', quantity: 2 },
+        { size: '5x7', quantity: 2 },
+      ],
+      summary: 'Two 11x14s, two 5x7s',
+    },
+    {
+      id: 'package-3',
+      name: 'Package 3',
+      price: 475,
+      contents: [
+        { size: '11x14', quantity: 1 },
+        { size: '5x7', quantity: 2 },
+        { size: '4 wallets', quantity: 1 },
+      ],
+      summary: 'One 11x14, two 5x7s, four wallets',
+    },
+    {
+      id: 'package-4',
+      name: 'Package 4',
+      price: 375,
+      contents: [
+        { size: '8x10', quantity: 1 },
+        { size: '5x7', quantity: 2 },
+        { size: '4 wallets', quantity: 1 },
+      ],
+      summary: 'One 8x10, two 5x7s, four wallets',
+    },
+  ],
+  singles: {
+    sizes: ['16x20', '11x14', '8x10', '5x7 / 4x5', '4 wallets'],
+    rows: [
+      { label: 'First print of each child', prices: [725, 375, 275, 200, null] },
+      { label: 'Same child, different pose', prices: [455, 225, 125, 55, 55] },
+      { label: 'Reprint, same child, size and pose', prices: [395, 95, 75, 45, null] },
+    ],
+  },
+  notes: [
+    'Basic retouching and clean-up of children’s faces is included. Additional retouching is quoted by our photo technicians.',
+  ],
+};
+
 const galleries: Gallery[] = [
   {
     id: 'g-2026-spring',
@@ -154,6 +218,7 @@ const galleries: Gallery[] = [
     ...galleryInfo('g-2026-spring'),
     orderBy: '2026-11-15',
     clientEmail: 'demo@example.com',
+    priceList: studioPriceList,
   },
   {
     id: 'g-2025-fall',
@@ -161,6 +226,7 @@ const galleries: Gallery[] = [
     sessionDate: '2025-10-11',
     ...galleryInfo('g-2025-fall'),
     clientEmail: 'demo@example.com',
+    priceList: studioPriceList,
   },
 ];
 

@@ -5,6 +5,7 @@ import type {
   HostessApplication,
   PhotoSession,
   PortfolioImage,
+  PriceList,
   ProofOrderRequest,
   TimeSlot,
 } from '@/lib/types';
@@ -26,8 +27,6 @@ type SessionRow = {
   address: string | null;
   start_date: string;
   end_date: string;
-  sitting_fee: number;
-  minimum_order: number;
   status: PhotoSession['status'];
   notes: string | null;
   session_hostesses: { name: string; email: string | null; phone: string | null }[];
@@ -35,7 +34,7 @@ type SessionRow = {
 };
 
 const SESSION_SELECT =
-  'id, city, state, venue_name, address, start_date, end_date, sitting_fee, minimum_order, status, notes, session_hostesses(name, email, phone), time_slots(id, starts_at, duration_minutes, available)';
+  'id, city, state, venue_name, address, start_date, end_date, status, notes, session_hostesses(name, email, phone), time_slots(id, starts_at, duration_minutes, available)';
 
 function mapSession(row: SessionRow): PhotoSession {
   return {
@@ -46,8 +45,6 @@ function mapSession(row: SessionRow): PhotoSession {
     address: row.address ?? undefined,
     startDate: row.start_date,
     endDate: row.end_date,
-    sittingFee: Number(row.sitting_fee),
-    minimumOrder: Number(row.minimum_order),
     status: row.status,
     notes: row.notes ?? undefined,
     hostesses: (row.session_hostesses ?? []).map((h) => ({
@@ -64,6 +61,27 @@ function mapSession(row: SessionRow): PhotoSession {
         available: t.available,
       }))
       .sort((a, b) => a.startsAt.localeCompare(b.startsAt)),
+  };
+}
+
+type PriceListRow = {
+  prints: PriceList['prints'];
+  composites: PriceList['composites'];
+  composite_extra_child: number | null;
+  packages: PriceList['packages'] | null;
+  singles: PriceList['singles'] | null;
+  notes: string[] | null;
+};
+
+function mapPriceList(row: PriceListRow | null): PriceList | undefined {
+  if (!row) return undefined;
+  return {
+    prints: row.prints,
+    composites: row.composites,
+    compositeExtraChild: row.composite_extra_child == null ? undefined : Number(row.composite_extra_child),
+    packages: row.packages ?? undefined,
+    singles: row.singles ?? undefined,
+    notes: row.notes ?? undefined,
   };
 }
 
@@ -199,7 +217,9 @@ export const supabaseApi: Api = {
   async listGalleries() {
     const { data, error } = await getSupabase()
       .from('galleries')
-      .select('id, title, session_date, cover_path, order_by, price_sheet_path, client_email, proofs(count)')
+      .select(
+        'id, title, session_date, cover_path, order_by, price_sheet_path, client_email, proofs(count), price_lists(prints, composites, composite_extra_child, packages, singles, notes)'
+      )
       .order('session_date', { ascending: false });
     if (error) throw error;
     return Promise.all(
@@ -212,6 +232,7 @@ export const supabaseApi: Api = {
         orderBy: row.order_by ?? undefined,
         priceSheetUrl: row.price_sheet_path ? await signedUrl('proofs', row.price_sheet_path) : undefined,
         clientEmail: row.client_email,
+        priceList: mapPriceList(row.price_lists as unknown as PriceListRow | null),
       }))
     );
   },

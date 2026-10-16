@@ -14,7 +14,7 @@ import { useAsync } from '@/hooks/use-async';
 import { useTheme } from '@/hooks/use-theme';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import { formatDate, formatMoney, formatTime, isValidEmail } from '@/lib/format';
+import { formatDate, formatTime, isValidEmail } from '@/lib/format';
 
 type Child = { name: string; age: string };
 
@@ -66,9 +66,7 @@ export default function BookScreen() {
         isWaitlist ? 'You’re on the list' : 'Request sent',
         isWaitlist
           ? 'The hostess will reach out if a time opens up.'
-          : `The hostess will confirm your ${slot ? formatTime(slot.startsAt) : ''} time by email. The ${formatMoney(
-              s.sittingFee
-            )} sitting fee per child is paid at the session.`,
+          : `The hostess will confirm your ${slot ? formatTime(slot.startsAt) : ''} time by email. The sitting fee is paid at the session.`,
         [{ text: 'OK', onPress: () => router.dismissAll() }]
       );
     } catch (e) {
@@ -187,8 +185,8 @@ export default function BookScreen() {
 
       <Card>
         <AppText variant="caption">
-          Sitting fee: {formatMoney(s.sittingFee)} per child, non-refundable, paid at the session by Venmo or cash and applied to
-          each child’s order (minimum {formatMoney(s.minimumOrder)} per child).
+          A non-refundable sitting fee per child is paid at the session by Venmo or cash and credited toward each child’s
+          order. Your hostess can share the details.
         </AppText>
       </Card>
 

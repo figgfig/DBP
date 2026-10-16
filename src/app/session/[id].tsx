@@ -16,7 +16,7 @@ import { useAsync } from '@/hooks/use-async';
 import { useTheme } from '@/hooks/use-theme';
 import { api } from '@/lib/api';
 import { Studio } from '@/lib/content';
-import { formatDate, formatDateRange, formatMoney, formatTime, isUpcoming } from '@/lib/format';
+import { formatDate, formatDateRange, formatTime, isUpcoming } from '@/lib/format';
 
 export default function SessionDetailScreen() {
   const theme = useTheme();
@@ -60,8 +60,11 @@ export default function SessionDetailScreen() {
       </View>
 
       <Card>
-        <Row icon="cash-outline" label="Sitting fee" value={`${formatMoney(s.sittingFee)} per child, non-refundable`} />
-        <Row icon="receipt-outline" label="Minimum order" value={`${formatMoney(s.minimumOrder)} per child. The sitting fee is applied to your order.`} />
+        <Row
+          icon="cash-outline"
+          label="Sitting fee"
+          value="A non-refundable sitting fee per child is collected at the session and credited toward that child’s order. Your hostess can share the details."
+        />
         <Row icon="time-outline" label="Session" value="15 minutes per family. Each child is photographed separately." />
         {s.venueName ? <Row icon="location-outline" label="Venue" value={s.venueName} /> : null}
         {s.notes ? <Row icon="information-circle-outline" label="Notes" value={s.notes} /> : null}

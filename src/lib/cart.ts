@@ -1,7 +1,6 @@
 import { useSyncExternalStore } from 'react';
 
-import type { PrintPackage } from '@/lib/content';
-import type { CompositeOrderItem, OrderItem, PackageOrderItem, PrintOrderItem } from '@/lib/types';
+import type { CompositeOrderItem, OrderItem, PackageOrderItem, PrintOrderItem, PrintPackage } from '@/lib/types';
 
 /**
  * In-memory order cart, one per gallery. Shared by the order screen and the

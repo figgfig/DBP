@@ -24,7 +24,7 @@ const QUICK_LINKS: { title: string; subtitle: string; icon: keyof typeof Ionicon
   { title: 'My Proofs', subtitle: 'View and favorite your images', icon: 'albums-outline', href: '/proofs' },
   { title: 'Reserve a Session', subtitle: 'Spring & Fall travel dates', icon: 'calendar-outline', href: '/sessions' },
   { title: 'Host a Session', subtitle: 'Bring DuBose to your city', icon: 'people-outline', href: '/hostess' },
-  { title: 'Sessions & Pricing', subtitle: 'Sitting fees and proofs', icon: 'pricetag-outline', href: '/pricing' },
+  { title: 'How Sessions Work', subtitle: 'What to expect', icon: 'information-circle-outline', href: '/pricing' },
 ];
 
 export default function HomeScreen() {
@@ -102,9 +102,9 @@ export default function HomeScreen() {
           upcoming.map((s) => <SessionCard key={s.id} session={s} />)
         )}
 
-        <SectionHeader eyebrow="The Studio" title="About DuBose" actionLabel="Read more" onAction={() => router.push('/about')} />
+        <SectionHeader eyebrow="The Studio" title="About the Studio" actionLabel="Read more" onAction={() => router.push('/about')} />
         <Card onPress={() => router.push('/about')}>
-          <AppText color="textSecondary">{About.paragraphs[1]}</AppText>
+          <AppText color="textSecondary">{About.intro}</AppText>
         </Card>
       </View>
     </Screen>

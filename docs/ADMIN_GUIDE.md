@@ -40,6 +40,26 @@ The family opens the app, signs in with that email, and the gallery appears unde
 
 Bulk uploads: the Supabase CLI (`supabase storage cp -r ./proofs/<gallery id> ss:///proofs/<gallery id>`) uploads a whole folder at once, and a short SQL `insert ... select` can create the proof rows from the file list.
 
+## Set prices
+
+Prices are never shown on public screens. A client only sees prices inside the order screen of their own gallery.
+
+1. **Table Editor → price_lists → Insert row**
+   - `name`: for example "Fall 2026"
+   - `prints`: single print price by size, in the order sizes should be listed, e.g. `{"5x7": 35, "8x10": 55, "11x14": 95, "16x20": 175, "20x24": 245}`
+   - `composites`: composite price by size, e.g. `{"8x10": 375, "11x14": 475, "16x20": 795}`. A second print of the same composite is charged at half price.
+   - `composite_extra_child` (optional): added for each additional child in one composite, e.g. `75`
+   - `packages` (optional): the print packages, e.g. `[{"id": "package-4", "name": "Package 4", "price": 375, "summary": "One 8x10, two 5x7s, four wallets", "contents": [{"size": "8x10", "quantity": 1}, {"size": "5x7", "quantity": 2}, {"size": "4 wallets", "quantity": 1}]}]`
+   - `singles` (optional): tiered single image prices shown as a table (first print, other poses, reprints). When single prints are tiered, leave `prints` as `{}`; the order screen then offers every size and the studio prices single prints on the invoice.
+   - `notes` (optional): extra lines for the client, e.g. what retouching is included.
+
+   `supabase/seed.sql` inserts the studio's Spring 2026 list, which is a complete example.
+2. On each gallery, set `price_list_id` to that price list's `id`. One price list can serve many galleries; make a new one when prices change so older galleries keep their original prices.
+
+When `prints` has prices, the sizes a client can order come from it, so adding or removing a size there changes the order screen. Composite sizes come from each template in `src/lib/composites.ts`; give each of those sizes a price in `composites`.
+
+`sitting_fee` and `minimum_order` on `photo_sessions` are for staff reference only. Database permissions stop the app from reading them.
+
 ## Read favorites and orders
 
 - **favorites** lists which proofs each client hearted (`user_id` joins to Authentication → Users for the email).

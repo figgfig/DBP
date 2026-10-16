@@ -39,3 +39,7 @@ Docs: https://docs.expo.dev/eas/index.md
 - If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand — configure native behavior in `app.json` and config plugins.
 - Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
 - Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
+
+## Business rules (DuBose Photography)
+
+- **Never show prices outside the order flow.** No dollar amounts (sitting fees, minimum orders, print or composite prices) on public screens: Home, Calendar, session pages, booking, How Sessions Work, About, Gallery. Prices appear only in `src/app/order.tsx` and `src/app/composite.tsx`, read from the signed-in client's own gallery price list. The database enforces this too (see `price_lists` and the `photo_sessions` column grants in `supabase/schema.sql`).

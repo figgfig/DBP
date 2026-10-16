@@ -12,8 +12,6 @@ export interface PhotoSession {
   startDate: string;
   /** ISO date of the last day (same as startDate for one-day sessions). */
   endDate: string;
-  sittingFee: number;
-  minimumOrder: number;
   status: SessionStatus;
   notes?: string;
   hostesses: Hostess[];
@@ -65,6 +63,35 @@ export interface HostessApplication {
   message?: string;
 }
 
+/**
+ * Prices for one gallery's order. Only ever loaded for a signed-in client who
+ * owns the gallery: prices are never shown anywhere else in the app.
+ */
+export interface PriceList {
+  /**
+   * Single print price by size, e.g. { "8x10": 55 }. The key order is the order sizes are listed in.
+   * Empty when single prints are tiered (see `singles`): the studio then prices them on the invoice.
+   */
+  prints: Record<string, number>;
+  /** Composite price by size. Each extra print of the same composite is half price. */
+  composites: Record<string, number>;
+  /** Added to a composite for each additional child in it. */
+  compositeExtraChild?: number;
+  packages?: PrintPackage[];
+  /** Tiered single-image prices, shown as a reference table. Each row's prices line up with `sizes`; null means not sold that way. */
+  singles?: { sizes: string[]; rows: { label: string; prices: (number | null)[] }[] };
+  notes?: string[];
+}
+
+export interface PrintPackage {
+  id: string;
+  name: string;
+  price: number;
+  /** What the package contains. Every print in a package is the same pose. */
+  contents: { size: string; quantity: number }[];
+  summary: string;
+}
+
 export interface Gallery {
   id: string;
   title: string;
@@ -75,6 +102,7 @@ export interface Gallery {
   /** Ordering deadline shown to the client, if any. */
   orderBy?: string;
   priceSheetUrl?: string;
+  priceList?: PriceList;
   clientEmail?: string;
 }
 
@@ -125,7 +153,7 @@ export interface CompositeOrderItem {
   slots: { slotId: string; proofId: string; label: string }[];
 }
 
-/** A print package of one proof (see Packages in content.ts). Every print in it is that pose. */
+/** A print package of one proof (see PriceList.packages). Every print in it is that pose. */
 export interface PackageOrderItem {
   kind: 'package';
   proofId: string;

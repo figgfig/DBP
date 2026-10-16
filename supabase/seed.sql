@@ -22,3 +22,32 @@ from photo_sessions s,
      generate_series(s.start_date, s.end_date, interval '1 day') as d,
      generate_series(0, 33) as n
 where s.status = 'open';
+
+-- The studio's Spring 2026 price list (what the 2026 order forms charged).
+-- Attach it to each gallery with galleries.price_list_id. Clients only see it
+-- inside the order screen of their own gallery.
+insert into price_lists (id, name, prints, composites, composite_extra_child, packages, singles, notes)
+values (
+  '44444444-4444-4444-4444-444444444444',
+  'Spring 2026',
+  '{}'::jsonb,  -- single prints are tiered (see singles), so the studio prices them on the invoice
+  '{"8x10": 375, "11x14": 475, "16x20": 795}'::jsonb,
+  75,
+  '[
+    {"id": "package-1", "name": "Package 1", "price": 795, "summary": "One 16x20, one 8x10, two 5x7s",
+     "contents": [{"size": "16x20", "quantity": 1}, {"size": "8x10", "quantity": 1}, {"size": "5x7", "quantity": 2}]},
+    {"id": "package-2", "name": "Package 2", "price": 550, "summary": "Two 11x14s, two 5x7s",
+     "contents": [{"size": "11x14", "quantity": 2}, {"size": "5x7", "quantity": 2}]},
+    {"id": "package-3", "name": "Package 3", "price": 475, "summary": "One 11x14, two 5x7s, four wallets",
+     "contents": [{"size": "11x14", "quantity": 1}, {"size": "5x7", "quantity": 2}, {"size": "4 wallets", "quantity": 1}]},
+    {"id": "package-4", "name": "Package 4", "price": 375, "summary": "One 8x10, two 5x7s, four wallets",
+     "contents": [{"size": "8x10", "quantity": 1}, {"size": "5x7", "quantity": 2}, {"size": "4 wallets", "quantity": 1}]}
+  ]'::jsonb,
+  '{"sizes": ["16x20", "11x14", "8x10", "5x7 / 4x5", "4 wallets"],
+    "rows": [
+      {"label": "First print of each child", "prices": [725, 375, 275, 200, null]},
+      {"label": "Same child, different pose", "prices": [455, 225, 125, 55, 55]},
+      {"label": "Reprint, same child, size and pose", "prices": [395, 95, 75, 45, null]}
+    ]}'::jsonb,
+  '["Basic retouching and clean-up of children''s faces is included. Additional retouching is quoted by our photo technicians."]'::jsonb
+);

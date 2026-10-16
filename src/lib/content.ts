@@ -1,3 +1,5 @@
+import type { Ionicons } from '@expo/vector-icons';
+
 /**
  * Static studio content. Everything here mirrors what is published on
  * dubosephotography.com so the app and the website say the same thing.
@@ -30,13 +32,36 @@ export const Studio = {
 };
 
 export const About = {
-  heading: 'About DuBose',
+  heading: 'About the Studio',
+  eyebrow: 'Charleston, South Carolina · Since 1994',
+  intro:
+    'DuBose Photography is a Charleston children’s portrait studio specializing in the classic black and white vignetted style created in the earliest days of photography.',
   paragraphs: [
-    'DuBose Photography specializes in the classic black and white vignetted style of portraiture created in the earlier days of photography.',
-    'DuBose Blakeney is a self-trained photographer and has been creating memorable images since 1994. His angelic portraits of children are displayed around the world, and their timeless look will take you back to days gone by.',
-    'A native Charlestonian, DuBose enjoys spending time with his family in the charm-filled Holy City.',
-    'DuBose travels around the Southeast providing children’s photography shoots, scheduling travel sessions during the Spring and Fall months. He photographs children from 6 months to 16 years.',
+    'Since 1994, the studio has created timeless portraits of children that are now displayed in homes around the world.',
+    'Each Spring and Fall, the studio travels to cities across the Southeast. Local hostesses organize every session, so families can be photographed close to home.',
   ],
+  highlights: [
+    {
+      icon: 'contrast-outline',
+      title: 'Classic black & white',
+      body: 'Soft, vignetted portraits with a timeless, heirloom look.',
+    },
+    {
+      icon: 'map-outline',
+      title: 'Sessions across the Southeast',
+      body: 'Travel sessions every Spring and Fall, hosted locally in each city.',
+    },
+    {
+      icon: 'happy-outline',
+      title: 'Children 6 months to 16 years',
+      body: 'A private 15-minute session for each family, with each child photographed separately.',
+    },
+    {
+      icon: 'images-outline',
+      title: 'Single images and composites',
+      body: 'Order individual portraits, or several poses arranged together on one print.',
+    },
+  ] satisfies { icon: keyof typeof Ionicons.glyphMap; title: string; body: string }[],
 };
 
 export const SessionInfo = {
@@ -50,7 +75,7 @@ export const SessionInfo = {
     },
     {
       title: 'Sitting fee',
-      body: 'A non-refundable sitting fee is charged for each child, usually $100 with a $200 minimum order per child. It is collected at the time of the session and applied to that child’s order. Each session lists its own fee and minimum.',
+      body: 'A non-refundable sitting fee is charged for each child. It is collected at the time of the session and credited toward that child’s order. Your hostess can share the details.',
     },
     {
       title: 'How to pay',
@@ -111,92 +136,4 @@ export const PrintSizes = ['4 wallets', '4x5', '5x7', '8x10', '11x14', '16x20'];
 /** Size a favorite proof starts with on a new order. */
 export const DefaultPrintSize = '8x10';
 
-/**
- * Print prices, taken from the studio's Spring 2026 order forms (the prices
- * the studio actually charged), with the package contents and composite rules
- * from the studio price lists. The website does not publish prices.
- */
-export interface PrintPackage {
-  id: string;
-  name: string;
-  price: number;
-  /** What the package contains. Every print in a package is the same pose. */
-  contents: { size: string; quantity: number }[];
-  summary: string;
-}
-
-export const Packages: PrintPackage[] = [
-  {
-    id: 'package-1',
-    name: 'Package 1',
-    price: 795,
-    contents: [
-      { size: '16x20', quantity: 1 },
-      { size: '8x10', quantity: 1 },
-      { size: '5x7', quantity: 2 },
-    ],
-    summary: 'One 16x20, one 8x10, two 5x7s',
-  },
-  {
-    id: 'package-2',
-    name: 'Package 2',
-    price: 550,
-    contents: [
-      { size: '11x14', quantity: 2 },
-      { size: '5x7', quantity: 2 },
-    ],
-    summary: 'Two 11x14s, two 5x7s',
-  },
-  {
-    id: 'package-3',
-    name: 'Package 3',
-    price: 475,
-    contents: [
-      { size: '11x14', quantity: 1 },
-      { size: '5x7', quantity: 2 },
-      { size: '4 wallets', quantity: 1 },
-    ],
-    summary: 'One 11x14, two 5x7s, four wallets',
-  },
-  {
-    id: 'package-4',
-    name: 'Package 4',
-    price: 375,
-    contents: [
-      { size: '8x10', quantity: 1 },
-      { size: '5x7', quantity: 2 },
-      { size: '4 wallets', quantity: 1 },
-    ],
-    summary: 'One 8x10, two 5x7s, four wallets',
-  },
-];
-
 export const PackageRules = 'Packages are for single image portraits only, all of the same pose. No substitutions.';
-
-export function getPackage(id: string): PrintPackage | undefined {
-  return Packages.find((p) => p.id === id);
-}
-
-export const CompositePricing = {
-  /** Price of one composite print by paper size. */
-  prices: { '8x10': 375, '11x14': 475, '16x20': 795 } as Record<string, number>,
-  additionalChild: 75,
-  notes: [
-    'Add $75 for each additional child in the same composite.',
-    'Buy one composite and get a second print of the same composite at half price.',
-  ],
-};
-
-/** Single image prices. Each row's prices line up with `sizes`; null means not sold that way. */
-export const SinglePricing = {
-  sizes: ['16x20', '11x14', '8x10', '5x7 / 4x5', '4 wallets'],
-  rows: [
-    { label: 'First print of each child', prices: [725, 375, 275, 200, null] },
-    { label: 'Same child, different pose', prices: [455, 225, 125, 55, 55] },
-    { label: 'Reprint, same child, size and pose', prices: [395, 95, 75, 45, null] },
-  ] as { label: string; prices: (number | null)[] }[],
-  notes: [
-    'After a composite, package, or first print, additional single images use the second and third rows.',
-    'Basic retouching and clean-up of children’s faces is included. Additional retouching is quoted by our photo technicians.',
-  ],
-};

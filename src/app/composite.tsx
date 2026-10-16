@@ -14,9 +14,8 @@ import { useTheme } from '@/hooks/use-theme';
 import { api } from '@/lib/api';
 import { cart, useCart } from '@/lib/cart';
 import { CompositeTemplates, getTemplate } from '@/lib/composites';
-import { CompositePricing } from '@/lib/content';
 import { formatMoney } from '@/lib/format';
-import type { Proof } from '@/lib/types';
+import type { PriceList, Proof } from '@/lib/types';
 
 let compositeCounter = 0;
 function newCompositeId() {
@@ -43,6 +42,7 @@ export default function CompositeScreen() {
   const initial = existing?.kind === 'composite' ? existing : undefined;
 
   const [proofs, setProofs] = useState<Proof[] | null>(null);
+  const [priceList, setPriceList] = useState<PriceList | undefined>(undefined);
   const [templateId, setTemplateId] = useState(initial?.templateId ?? CompositeTemplates[0].id);
   const [assigned, setAssigned] = useState<Record<string, string>>(
     () => Object.fromEntries((initial?.slots ?? []).map((s) => [s.slotId, s.proofId]))
@@ -55,6 +55,7 @@ export default function CompositeScreen() {
 
   useEffect(() => {
     api.listProofs(galleryId).then(setProofs);
+    api.getGallery(galleryId).then((g) => setPriceList(g?.priceList));
   }, [galleryId]);
 
   const contentWidth = Math.min(width, MaxContentWidth) - Spacing.md * 2;
@@ -234,6 +235,7 @@ export default function CompositeScreen() {
       <View style={styles.chips}>
         {template.sizes.map((s) => {
           const active = s === size;
+          const price = priceList?.composites[s];
           return (
             <Pressable
               key={s}
@@ -246,13 +248,22 @@ export default function CompositeScreen() {
               ]}>
               <AppText variant="label" style={{ color: active ? theme.accentText : theme.text }}>
                 {s}
-                {CompositePricing.prices[s] ? ` · ${formatMoney(CompositePricing.prices[s])}` : ''}
               </AppText>
+              {price !== undefined ? (
+                <AppText variant="caption" style={{ color: active ? theme.accentText : theme.textSecondary }}>
+                  {formatMoney(price)}
+                </AppText>
+              ) : null}
             </Pressable>
           );
         })}
       </View>
-      <AppText variant="caption">{CompositePricing.notes.join(' ')}</AppText>
+      <AppText variant="caption">
+        {priceList?.compositeExtraChild
+          ? `Add ${formatMoney(priceList.compositeExtraChild)} for each additional child in the same composite. `
+          : ''}
+        A second print of the same composite is half price.
+      </AppText>
       <View style={styles.qtyRow}>
         <AppText variant="label" style={styles.flex}>
           Quantity
@@ -327,7 +338,7 @@ const styles = StyleSheet.create({
   },
   hint: { marginTop: Spacing.xs },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
-  chip: { borderWidth: 1, borderRadius: 999, paddingHorizontal: Spacing.md, paddingVertical: 8 },
+  chip: { borderWidth: 1, borderRadius: Radius.md, paddingHorizontal: Spacing.md, paddingVertical: 8, alignItems: 'center' },
   qtyRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginTop: Spacing.md },
   qty: { minWidth: 24, textAlign: 'center' },
   qtyButton: { width: 36, height: 36, borderRadius: 18, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
