@@ -14,6 +14,8 @@ import { useTheme } from '@/hooks/use-theme';
 import { api } from '@/lib/api';
 import { cart, useCart } from '@/lib/cart';
 import { CompositeTemplates, getTemplate } from '@/lib/composites';
+import { CompositePricing } from '@/lib/content';
+import { formatMoney } from '@/lib/format';
 import type { Proof } from '@/lib/types';
 
 let compositeCounter = 0;
@@ -244,11 +246,13 @@ export default function CompositeScreen() {
               ]}>
               <AppText variant="label" style={{ color: active ? theme.accentText : theme.text }}>
                 {s}
+                {CompositePricing.prices[s] ? ` · ${formatMoney(CompositePricing.prices[s])}` : ''}
               </AppText>
             </Pressable>
           );
         })}
       </View>
+      <AppText variant="caption">{CompositePricing.notes.join(' ')}</AppText>
       <View style={styles.qtyRow}>
         <AppText variant="label" style={styles.flex}>
           Quantity

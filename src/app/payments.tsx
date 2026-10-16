@@ -9,11 +9,9 @@ import { useTheme } from '@/hooks/use-theme';
 import { PaymentsInfo, Studio } from '@/lib/content';
 
 const METHODS: { icon: keyof typeof Ionicons.glyphMap; label: string; accepted: boolean }[] = [
-  { icon: 'phone-portrait-outline', label: 'Venmo', accepted: true },
-  { icon: 'cash-outline', label: 'Cash', accepted: true },
-  { icon: 'document-text-outline', label: 'Check', accepted: true },
+  { icon: 'phone-portrait-outline', label: 'Venmo @dubphotos (orders and sitting fees)', accepted: true },
+  { icon: 'cash-outline', label: 'Cash (sitting fees at the session)', accepted: true },
   { icon: 'card-outline', label: 'Credit or debit card', accepted: false },
-  { icon: 'logo-paypal', label: 'PayPal', accepted: false },
 ];
 
 export default function PaymentsScreen() {

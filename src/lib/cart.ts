@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react';
 
-import type { CompositeOrderItem, OrderItem, PrintOrderItem } from '@/lib/types';
+import type { PrintPackage } from '@/lib/content';
+import type { CompositeOrderItem, OrderItem, PackageOrderItem, PrintOrderItem } from '@/lib/types';
 
 /**
  * In-memory order cart, one per gallery. Shared by the order screen and the
@@ -53,9 +54,34 @@ export const cart = {
     });
   },
 
-  /** Removes every size of a proof. */
+  /** Sets how many of a package a proof is ordered in. Quantity 0 removes it. */
+  setPackageQuantity(galleryId: string, proof: { proofId: string; label: string }, pkg: PrintPackage, quantity: number) {
+    update(galleryId, (c) => {
+      const isLine = (i: OrderItem) => i.kind === 'package' && i.proofId === proof.proofId && i.packageId === pkg.id;
+      if (quantity <= 0) return { ...c, items: c.items.filter((i) => !isLine(i)) };
+      const line: PackageOrderItem = {
+        kind: 'package',
+        proofId: proof.proofId,
+        label: proof.label,
+        packageId: pkg.id,
+        packageName: pkg.name,
+        price: pkg.price,
+        quantity,
+      };
+      const index = c.items.findIndex(isLine);
+      if (index === -1) return { ...c, items: [...c.items, line] };
+      const items = [...c.items];
+      items[index] = line;
+      return { ...c, items };
+    });
+  },
+
+  /** Removes every size and package of a proof. */
   removeProof(galleryId: string, proofId: string) {
-    update(galleryId, (c) => ({ ...c, items: c.items.filter((i) => !(i.kind === 'print' && i.proofId === proofId)) }));
+    update(galleryId, (c) => ({
+      ...c,
+      items: c.items.filter((i) => !((i.kind === 'print' || i.kind === 'package') && i.proofId === proofId)),
+    }));
   },
 
   /** Adds a composite, or replaces it if one with the same id exists. */

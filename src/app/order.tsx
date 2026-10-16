@@ -17,13 +17,16 @@ import { useTheme } from '@/hooks/use-theme';
 import { api } from '@/lib/api';
 import { cart, useCart } from '@/lib/cart';
 import { getTemplate } from '@/lib/composites';
-import { PrintSizes, Studio } from '@/lib/content';
-import type { CompositeOrderItem, PrintOrderItem, Proof } from '@/lib/types';
+import { CompositePricing, DefaultPrintSize, PackageRules, Packages, PrintSizes, Studio } from '@/lib/content';
+import { formatMoney } from '@/lib/format';
+import type { CompositeOrderItem, PackageOrderItem, PrintOrderItem, Proof } from '@/lib/types';
 
 /**
- * Print order. Each proof can be ordered in several sizes at once, and
- * composites built in the composite builder appear alongside single prints.
- * Pricing is on the emailed price sheet, so the studio invoices after review.
+ * Print order. Each proof can be ordered in several sizes and packages at
+ * once, and composites built in the composite builder appear alongside.
+ * Package and composite prices are fixed and shown here. Single prints are
+ * tiered (first print, other poses, reprints), so the studio prices them on
+ * the invoice after review.
  */
 export default function OrderScreen() {
   const theme = useTheme();
@@ -41,24 +44,33 @@ export default function OrderScreen() {
         galleryId,
         all
           .filter((p) => p.isFavorite)
-          .map<PrintOrderItem>((p) => ({ kind: 'print', proofId: p.id, label: p.label, size: PrintSizes[1], quantity: 1 }))
+          .map<PrintOrderItem>((p) => ({ kind: 'print', proofId: p.id, label: p.label, size: DefaultPrintSize, quantity: 1 }))
       );
     });
   }, [galleryId]);
 
   const prints = items.filter((i): i is PrintOrderItem => i.kind === 'print');
   const composites = items.filter((i): i is CompositeOrderItem => i.kind === 'composite');
+  const packages = items.filter((i): i is PackageOrderItem => i.kind === 'package');
   const proofById = new Map((proofs ?? []).map((p) => [p.id, p]));
 
   // Proofs shown as print cards: anything with a size in the cart, plus proofs just added with nothing chosen yet.
-  const printProofIds = [...new Set([...prints.map((p) => p.proofId), ...extraProofIds])];
+  const printProofIds = [...new Set([...prints.map((p) => p.proofId), ...packages.map((p) => p.proofId), ...extraProofIds])];
   const remaining = (proofs ?? []).filter((p) => !printProofIds.includes(p.id));
   const totalPrints = prints.reduce((sum, p) => sum + p.quantity, 0);
   const totalComposites = composites.reduce((sum, c) => sum + c.quantity, 0);
-  const totalItems = totalPrints + totalComposites;
+  const totalPackages = packages.reduce((sum, p) => sum + p.quantity, 0);
+  const totalItems = totalPrints + totalComposites + totalPackages;
+  const fixedSubtotal =
+    packages.reduce((sum, p) => sum + p.price * p.quantity, 0) +
+    composites.reduce((sum, c) => sum + compositePrice(c), 0);
 
   function qtyFor(proofId: string, size: string) {
     return prints.find((p) => p.proofId === proofId && p.size === size)?.quantity ?? 0;
+  }
+
+  function packageQtyFor(proofId: string, packageId: string) {
+    return packages.find((p) => p.proofId === proofId && p.packageId === packageId)?.quantity ?? 0;
   }
 
   function removeProof(proofId: string) {
@@ -93,8 +105,8 @@ export default function OrderScreen() {
   return (
     <Screen>
       <AppText color="textSecondary">
-        Order each proof in as many sizes as you like, and build composites from several proofs. Prices are on your price sheet. The
-        studio confirms every order before printing.
+        Order each proof in as many sizes or packages as you like, and build composites from several proofs. The studio confirms
+        every order and sends an invoice before printing.
       </AppText>
 
       <SectionHeader eyebrow="Composites" title="Several poses, one print" />
@@ -115,7 +127,10 @@ export default function OrderScreen() {
               <View style={styles.flex}>
                 <AppText variant="subheading">{c.templateName}</AppText>
                 <AppText variant="caption">{c.slots.map((s) => s.label).join(', ')}</AppText>
-                <AppText variant="caption">Size {c.size}</AppText>
+                <AppText variant="caption">
+                  Size {c.size}
+                  {CompositePricing.prices[c.size] ? ` · ${formatMoney(compositePrice(c))}` : ''}
+                </AppText>
               </View>
             </View>
             <View style={styles.compositeActions}>
@@ -151,7 +166,11 @@ export default function OrderScreen() {
         onPress={() => router.push({ pathname: '/composite', params: { galleryId } })}
       />
 
-      <SectionHeader eyebrow="Single prints" title="Choose sizes for each proof" />
+      <AppText variant="caption">
+        {CompositePricing.notes.join(' ')} More than one child in a composite? Say so in the notes.
+      </AppText>
+
+      <SectionHeader eyebrow="Single prints and packages" title="Choose sizes for each proof" />
       {printProofIds.length === 0 ? (
         <Card>
           <AppText color="textSecondary">Add proofs below, or mark favorites in your gallery first.</AppText>
@@ -161,6 +180,13 @@ export default function OrderScreen() {
           const proof = proofById.get(proofId);
           if (!proof) return null;
           const proofTotal = PrintSizes.reduce((sum, s) => sum + qtyFor(proofId, s), 0);
+          const proofPackages = Packages.reduce((sum, p) => sum + packageQtyFor(proofId, p.id), 0);
+          const proofSummary = [
+            proofTotal ? `${proofTotal} print${proofTotal === 1 ? '' : 's'}` : '',
+            proofPackages ? `${proofPackages} package${proofPackages === 1 ? '' : 's'}` : '',
+          ]
+            .filter(Boolean)
+            .join(' · ');
           return (
             <Card key={proofId}>
               <View style={styles.lineRow}>
@@ -179,7 +205,7 @@ export default function OrderScreen() {
                     </Pressable>
                   </View>
                   <AppText variant="caption">
-                    {proofTotal === 0 ? 'Set a quantity on any size.' : `${proofTotal} print${proofTotal === 1 ? '' : 's'}`}
+                    {proofSummary || 'Set a quantity on any size or package.'}
                   </AppText>
                 </View>
               </View>
@@ -200,6 +226,30 @@ export default function OrderScreen() {
                     </View>
                   );
                 })}
+              </View>
+              <View style={[styles.sizeTable, { borderTopColor: theme.border }]}>
+                {Packages.map((pkg) => {
+                  const qty = packageQtyFor(proofId, pkg.id);
+                  return (
+                    <View key={pkg.id} style={styles.sizeRow}>
+                      <View style={styles.flex}>
+                        <AppText style={qty > 0 ? styles.sizeActive : null} color={qty > 0 ? 'text' : 'textSecondary'}>
+                          {pkg.name} · {formatMoney(pkg.price)}
+                        </AppText>
+                        <AppText variant="caption">{pkg.summary}</AppText>
+                      </View>
+                      <Stepper
+                        value={qty}
+                        min={0}
+                        onChange={(q) => cart.setPackageQuantity(galleryId, { proofId, label: proof.label }, pkg, q)}
+                        label={`${proof.label} ${pkg.name} quantity`}
+                      />
+                    </View>
+                  );
+                })}
+                <AppText variant="caption" style={styles.packageRule}>
+                  {PackageRules}
+                </AppText>
               </View>
             </Card>
           );
@@ -241,12 +291,25 @@ export default function OrderScreen() {
       <Card>
         <AppText variant="label">Order summary</AppText>
         <AppText color="textSecondary">
-          {totalPrints} single print{totalPrints === 1 ? '' : 's'} · {totalComposites} composite{totalComposites === 1 ? '' : 's'}
+          {totalPrints} single print{totalPrints === 1 ? '' : 's'} · {totalPackages} package{totalPackages === 1 ? '' : 's'} ·{' '}
+          {totalComposites} composite{totalComposites === 1 ? '' : 's'}
+        </AppText>
+        {fixedSubtotal > 0 ? (
+          <AppText color="textSecondary">Packages and composites: {formatMoney(fixedSubtotal)}</AppText>
+        ) : null}
+        <AppText variant="caption" style={styles.packageRule}>
+          Single prints, extra children, tax and shipping are added on your invoice. Pay by Venmo at @dubphotos.
         </AppText>
       </Card>
       <Button title={`Send order (${totalItems})`} onPress={submit} loading={submitting} disabled={totalItems === 0} />
     </Screen>
   );
+}
+
+/** Composite price: the first print at full price, each extra print of the same composite at half price. */
+function compositePrice(c: CompositeOrderItem): number {
+  const base = CompositePricing.prices[c.size] ?? 0;
+  return base + (c.quantity - 1) * (base / 2);
 }
 
 function Stepper({ value, min, onChange, label }: { value: number; min: number; onChange: (v: number) => void; label: string }) {
@@ -285,6 +348,7 @@ const styles = StyleSheet.create({
   sizeTable: { marginTop: Spacing.sm, paddingTop: Spacing.xs, borderTopWidth: StyleSheet.hairlineWidth },
   sizeRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 4 },
   sizeActive: { fontWeight: '600' },
+  packageRule: { marginTop: Spacing.xs },
   stepper: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   qty: { minWidth: 22, textAlign: 'center' },
   qtyButton: { width: 32, height: 32, borderRadius: 16, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },

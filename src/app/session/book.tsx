@@ -187,7 +187,7 @@ export default function BookScreen() {
 
       <Card>
         <AppText variant="caption">
-          Sitting fee: {formatMoney(s.sittingFee)} per child, non-refundable, paid at the session by Venmo, cash, or check and applied to
+          Sitting fee: {formatMoney(s.sittingFee)} per child, non-refundable, paid at the session by Venmo or cash and applied to
           each child’s order (minimum {formatMoney(s.minimumOrder)} per child).
         </AppText>
       </Card>

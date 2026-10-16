@@ -45,3 +45,7 @@ example
 # secrets
 .env
 google-play-service-account.json
+
+# studio client photographs: local only, never in the public repo
+assets/studio/*
+!assets/studio/README.md

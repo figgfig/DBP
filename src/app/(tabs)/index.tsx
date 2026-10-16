@@ -18,6 +18,7 @@ import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { About, Studio } from '@/lib/content';
 import { isUpcoming } from '@/lib/format';
+import { studioPhoto } from '@/lib/studio-photos';
 
 const QUICK_LINKS: { title: string; subtitle: string; icon: keyof typeof Ionicons.glyphMap; href: Href }[] = [
   { title: 'My Proofs', subtitle: 'View and favorite your images', icon: 'albums-outline', href: '/proofs' },
@@ -37,7 +38,7 @@ export default function HomeScreen() {
     <Screen padded={false} refreshing={false} onRefresh={sessions.refresh}>
       <View style={[styles.hero, { paddingTop: insets.top + Spacing.xl, backgroundColor: '#161412' }]}>
         <Image
-          source={{ uri: 'https://picsum.photos/seed/dbp-hero/900/1200?grayscale' }}
+          source={{ uri: studioPhoto('hero', 900, 1200) }}
           style={StyleSheet.absoluteFill}
           contentFit="cover"
           transition={300}

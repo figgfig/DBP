@@ -145,7 +145,7 @@ export default function SessionDetailScreen() {
             />
           ) : null}
           <AppText variant="caption" center style={styles.fine}>
-            Your request goes to the hostess, who confirms your time. The sitting fee is paid at the session by Venmo, cash, or check.
+            Your request goes to the hostess, who confirms your time. The sitting fee is paid at the session by Venmo or cash.
           </AppText>
         </>
       ) : (

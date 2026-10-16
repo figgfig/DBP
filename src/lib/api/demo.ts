@@ -13,12 +13,15 @@ import type {
   TimeSlot,
 } from '@/lib/types';
 
+import { studioPhoto, studioPhotoNames } from '@/lib/studio-photos';
+
 import type { Api } from './types';
 
 /**
  * Demo provider. Used whenever Supabase is not configured so the app can be
- * reviewed end to end. Sample images are black-and-white placeholders and
- * must be replaced with the studio's own photographs before release.
+ * reviewed end to end. Images are the studio's own prints and composites
+ * when `assets/studio/` is present (see `src/lib/studio-photos.ts`), and
+ * grayscale placeholders otherwise.
  */
 
 const DEMO_LOGIN_CODE = '123456';
@@ -26,12 +29,10 @@ const USER_KEY = 'dbp.demo.user';
 const FAVORITES_KEY = 'dbp.demo.favorites';
 const BOOKINGS_KEY = 'dbp.demo.bookings';
 
-const placeholder = (seed: string, w = 600, h = 800) =>
-  `https://picsum.photos/seed/${encodeURIComponent(seed)}/${w}/${h}?grayscale`;
-
+/** `startHour` may be fractional: 8.5 is 8:30 AM. */
 function slots(sessionId: string, date: string, startHour: number, count: number, taken: number[]): TimeSlot[] {
   return Array.from({ length: count }, (_, i) => {
-    const minutes = startHour * 60 + i * 15;
+    const minutes = Math.round(startHour * 60) + i * 15;
     const hh = String(Math.floor(minutes / 60)).padStart(2, '0');
     const mm = String(minutes % 60).padStart(2, '0');
     return {
@@ -44,127 +45,113 @@ function slots(sessionId: string, date: string, startHour: number, count: number
   });
 }
 
+/**
+ * Real sessions from the calendar on dubosephotography.com (checked 2026-10-09).
+ * Every session runs 8:30 AM to 5:00 PM unless noted, in 15-minute slots.
+ * Slot availability is not published on the website, so every slot starts open here.
+ */
+const SESSION_NOTES = 'Please arrive ten minutes before your session. DuBose Photography does not offer digital copies of client images.';
+const FULL_DAY = 34; // 8:30 AM to 5:00 PM
 const sessions: PhotoSession[] = [
   {
     id: 'atlanta-2026-10',
     city: 'Atlanta',
     state: 'GA',
-    venueName: 'Private residence, Buckhead',
-    startDate: '2026-10-16',
-    endDate: '2026-10-17',
-    sittingFee: 100,
-    minimumOrder: 200,
-    status: 'open',
-    notes: 'Indoor session. Exact address is shared by the hostess after your time is confirmed.',
-    hostesses: [
-      { name: 'Emily Karempelis', email: 'dubosephotographyatlanta@gmail.com' },
-      { name: 'Bridget Keller', email: 'dubosephotographyatlanta@gmail.com' },
-    ],
-    timeSlots: [
-      ...slots('atlanta-2026-10', '2026-10-16', 9, 20, [0, 1, 4, 7, 8, 12]),
-      ...slots('atlanta-2026-10', '2026-10-17', 9, 16, [2, 3, 9]),
-    ],
-  },
-  {
-    id: 'st-simons-2026-10',
-    city: 'St. Simons Island',
-    state: 'GA',
-    startDate: '2026-10-22',
-    endDate: '2026-10-22',
-    sittingFee: 100,
-    minimumOrder: 200,
-    status: 'waitlist',
-    hostesses: [{ name: 'Molly Nobles', email: 'mollyrnobles@gmail.com' }],
-    timeSlots: slots('st-simons-2026-10', '2026-10-22', 9, 20, Array.from({ length: 20 }, (_, i) => i)),
-  },
-  {
-    id: 'charlotte-2026-11',
-    city: 'Charlotte',
-    state: 'NC',
-    startDate: '2026-11-06',
-    endDate: '2026-11-06',
-    sittingFee: 100,
-    minimumOrder: 200,
-    status: 'open',
-    hostesses: [{ name: 'Meredith Chapman', email: 'hostess@example.com' }],
-    timeSlots: slots('charlotte-2026-11', '2026-11-06', 10, 16, [0, 5, 6]),
-  },
-  {
-    id: 'mount-pleasant-2026-11',
-    city: 'Mount Pleasant',
-    state: 'SC',
-    startDate: '2026-11-14',
-    endDate: '2026-11-14',
-    sittingFee: 75,
-    minimumOrder: 75,
-    status: 'open',
-    notes: 'Home session near the studio. Fee is applied to each child’s order with a $75 minimum per child.',
-    hostesses: [{ name: 'Studio', email: 'ordersdbp@gmail.com', phone: '(843) 442-4096' }],
-    timeSlots: slots('mount-pleasant-2026-11', '2026-11-14', 9, 12, [1]),
-  },
-  {
-    id: 'augusta-2027-03',
-    city: 'Augusta',
-    state: 'GA',
-    startDate: '2027-03-12',
-    endDate: '2027-03-12',
-    sittingFee: 100,
-    minimumOrder: 200,
-    status: 'open',
-    hostesses: [{ name: 'Christina Lake', email: 'christinaelake@gmail.com' }],
-    timeSlots: slots('augusta-2027-03', '2027-03-12', 9, 20, []),
-  },
-  {
-    id: 'birmingham-2027-04',
-    city: 'Birmingham',
-    state: 'AL',
-    startDate: '2027-04-09',
-    endDate: '2027-04-10',
-    sittingFee: 100,
-    minimumOrder: 200,
-    status: 'open',
-    hostesses: [
-      { name: 'Mary Coleman Clark', email: 'hostess@example.com' },
-      { name: 'Rachel Weingartner', email: 'hostess@example.com' },
-    ],
-    timeSlots: [
-      ...slots('birmingham-2027-04', '2027-04-09', 9, 20, []),
-      ...slots('birmingham-2027-04', '2027-04-10', 9, 20, []),
-    ],
-  },
-  {
-    id: 'raleigh-2026-03',
-    city: 'Raleigh',
-    state: 'NC',
-    startDate: '2026-03-20',
-    endDate: '2026-03-20',
+    startDate: '2026-10-01',
+    endDate: '2026-10-02',
     sittingFee: 100,
     minimumOrder: 200,
     status: 'past',
-    hostesses: [{ name: 'Hostess', email: 'hostess@example.com' }],
-    timeSlots: [],
+    notes: SESSION_NOTES,
+    hostesses: [{ name: 'Whitney McMurray' }],
+    timeSlots: [
+      ...slots('atlanta-2026-10', '2026-10-01', 8.5, FULL_DAY, []),
+      ...slots('atlanta-2026-10', '2026-10-02', 8.5, 14, []), // 8:30 AM to 12:00 PM
+    ],
+  },
+  {
+    id: 'charlotte-2026-10',
+    city: 'Charlotte',
+    state: 'NC',
+    startDate: '2026-10-19',
+    endDate: '2026-10-20',
+    sittingFee: 100,
+    minimumOrder: 200,
+    status: 'open',
+    notes: SESSION_NOTES,
+    hostesses: [{ name: 'Gatesy Plyler' }],
+    timeSlots: [
+      ...slots('charlotte-2026-10', '2026-10-19', 8.5, FULL_DAY, []),
+      ...slots('charlotte-2026-10', '2026-10-20', 8.5, FULL_DAY, []),
+    ],
+  },
+  {
+    id: 'charlotte-lake-norman-2026-10',
+    city: 'Charlotte / Lake Norman',
+    state: 'NC',
+    startDate: '2026-10-21',
+    endDate: '2026-10-21',
+    sittingFee: 100,
+    minimumOrder: 200,
+    status: 'open',
+    notes: SESSION_NOTES,
+    hostesses: [{ name: 'Jennifer Estridge' }],
+    timeSlots: slots('charlotte-lake-norman-2026-10', '2026-10-21', 8.5, FULL_DAY, []),
   },
 ];
 
 const portfolio: PortfolioImage[] = [
-  { id: 'p1', url: placeholder('dbp-portfolio-1'), caption: 'Single image, 8x10', category: 'single' },
-  { id: 'p2', url: placeholder('dbp-portfolio-2'), caption: 'Siblings', category: 'siblings' },
-  { id: 'p3', url: placeholder('dbp-portfolio-3'), caption: 'Composite, three poses', category: 'composite' },
-  { id: 'p4', url: placeholder('dbp-portfolio-4'), caption: 'Single image', category: 'single' },
-  { id: 'p5', url: placeholder('dbp-portfolio-5'), caption: 'Single image', category: 'single' },
-  { id: 'p6', url: placeholder('dbp-portfolio-6'), caption: 'Siblings', category: 'siblings' },
-  { id: 'p7', url: placeholder('dbp-portfolio-7'), caption: 'Composite', category: 'composite' },
-  { id: 'p8', url: placeholder('dbp-portfolio-8'), caption: 'Single image', category: 'single' },
-  { id: 'p9', url: placeholder('dbp-portfolio-9'), caption: 'Single image', category: 'single' },
+  { id: 'p1', url: studioPhoto('single-1'), caption: 'Single image, 11x14', category: 'single' },
+  { id: 'p2', url: studioPhoto('composite-1'), caption: 'Composite, five poses (05 Vertical)', category: 'composite' },
+  { id: 'p3', url: studioPhoto('single-2'), caption: 'Single image, 8x10', category: 'single' },
+  { id: 'p4', url: studioPhoto('siblings-1'), caption: 'Siblings composite (02 Horizontal)', category: 'siblings' },
+  { id: 'p5', url: studioPhoto('single-3'), caption: 'Single image, 5x7', category: 'single' },
+  { id: 'p6', url: studioPhoto('composite-2'), caption: 'Composite, three poses (01 Horizontal)', category: 'composite' },
+  { id: 'p7', url: studioPhoto('single-4'), caption: 'Single image, 8x10', category: 'single' },
+  { id: 'p8', url: studioPhoto('composite-3'), caption: 'Composite, four poses (04 Horizontal)', category: 'composite' },
+  { id: 'p9', url: studioPhoto('single-5'), caption: 'Single image, 8x10', category: 'single' },
+  { id: 'p10', url: studioPhoto('composite-4'), caption: 'Composite, three poses (027 Horizontal)', category: 'composite' },
 ];
+
+/**
+ * Proof labels are the studio's frame numbers (D203 and so on), as on the
+ * order forms. Without the studio photos each gallery gets placeholders.
+ */
+function proofSet(galleryId: string, prefix: string, fallbackCount: number): Proof[] {
+  const names = studioPhotoNames(prefix);
+  const labels = names.length
+    ? names.map((n) => n.slice(prefix.length))
+    : Array.from({ length: fallbackCount }, (_, i) => `D${201 + i * 7}`);
+  return labels.map((label, i) => {
+    const url = studioPhoto(`${prefix}${label}`, 1200, 1600);
+    return {
+      id: `${galleryId}-proof-${i + 1}`,
+      galleryId,
+      label,
+      thumbnailUrl: url,
+      fullUrl: url,
+      width: 1200,
+      height: 1600,
+    };
+  });
+}
+
+const proofs: Proof[] = [
+  ...proofSet('g-2026-spring', 'proof-a-', 12),
+  ...proofSet('g-2025-fall', 'proof-b-', 8),
+];
+
+const galleryInfo = (id: string) => {
+  const set = proofs.filter((p) => p.galleryId === id);
+  return { coverUrl: set[0]?.thumbnailUrl, proofCount: set.length };
+};
 
 const galleries: Gallery[] = [
   {
     id: 'g-2026-spring',
     title: 'Spring 2026 Session',
     sessionDate: '2026-03-20',
-    coverUrl: placeholder('dbp-proof-g1-1', 400, 533),
-    proofCount: 12,
+    ...galleryInfo('g-2026-spring'),
     orderBy: '2026-11-15',
     clientEmail: 'demo@example.com',
   },
@@ -172,23 +159,10 @@ const galleries: Gallery[] = [
     id: 'g-2025-fall',
     title: 'Fall 2025 Session',
     sessionDate: '2025-10-11',
-    coverUrl: placeholder('dbp-proof-g2-1', 400, 533),
-    proofCount: 8,
+    ...galleryInfo('g-2025-fall'),
     clientEmail: 'demo@example.com',
   },
 ];
-
-const proofs: Proof[] = galleries.flatMap((g, gi) =>
-  Array.from({ length: g.proofCount }, (_, i) => ({
-    id: `${g.id}-proof-${i + 1}`,
-    galleryId: g.id,
-    label: `DBP-${gi + 1}${String(i + 1).padStart(3, '0')}`,
-    thumbnailUrl: placeholder(`dbp-proof-g${gi + 1}-${i + 1}`, 400, 533),
-    fullUrl: placeholder(`dbp-proof-g${gi + 1}-${i + 1}`, 1200, 1600),
-    width: 1200,
-    height: 1600,
-  }))
-);
 
 const listeners = new Set<(user: ClientUser | null) => void>();
 

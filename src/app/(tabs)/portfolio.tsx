@@ -14,6 +14,9 @@ import { useTheme } from '@/hooks/use-theme';
 import { api } from '@/lib/api';
 import type { PortfolioImage } from '@/lib/types';
 
+/** The prints' white paper, so tiles look like the printed portraits. */
+const PAPER = '#FFFFFF';
+
 type Category = 'all' | PortfolioImage['category'];
 const CATEGORIES: { key: Category; label: string }[] = [
   { key: 'all', label: 'All' },
@@ -73,8 +76,9 @@ export default function PortfolioScreen() {
               accessibilityRole="imagebutton"
               accessibilityLabel={img.caption ?? 'Portrait'}
               onPress={() => setSelected(img)}
-              style={[styles.tile, { width: tile, height: tile * 1.33, backgroundColor: theme.surfaceAlt }]}>
-              <Image source={{ uri: img.url }} style={StyleSheet.absoluteFill} contentFit="cover" transition={200} />
+              style={[styles.tile, { width: tile, height: tile * 1.33, backgroundColor: PAPER, borderColor: theme.border }]}>
+              {/* contain, so landscape composites show whole, on print-white paper */}
+              <Image source={{ uri: img.url }} style={StyleSheet.absoluteFill} contentFit="contain" transition={200} />
             </Pressable>
           ))}
         </View>
@@ -110,7 +114,7 @@ const styles = StyleSheet.create({
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginBottom: Spacing.md },
   chip: { borderWidth: 1, borderRadius: 999, paddingHorizontal: Spacing.md, paddingVertical: 6 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
-  tile: { borderRadius: Radius.sm, overflow: 'hidden' },
+  tile: { borderRadius: Radius.sm, overflow: 'hidden', borderWidth: StyleSheet.hairlineWidth },
   viewer: { flex: 1, backgroundColor: '#000000' },
   close: { position: 'absolute', right: Spacing.md, padding: Spacing.sm, backgroundColor: 'rgba(0,0,0,0.4)', borderRadius: 999 },
   captionBar: { position: 'absolute', left: 0, right: 0, bottom: 0, padding: Spacing.md, backgroundColor: 'rgba(0,0,0,0.5)' },

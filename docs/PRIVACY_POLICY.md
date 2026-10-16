@@ -2,7 +2,7 @@
 
 _Last updated: October 6, 2026. Publish this page on dubosephotography.com and link it from both app stores._
 
-DuBose Photography ("we", "the studio"), 332 E Bay St, Charleston, SC 29401, operates the DuBose Photography mobile app. This policy explains what the app collects and how it is used.
+DuBose Photography ("we", "the studio"), 6201 Church Flats Road, Hollywood, SC 29449, operates the DuBose Photography mobile app. This policy explains what the app collects and how it is used.
 
 ## What we collect
 
@@ -32,4 +32,4 @@ Access to proofs is restricted to the signed-in client whose email matches the g
 
 ## Contact
 
-DuBose Photography · 332 E Bay St, Charleston, SC 29401 · (843) 442-4096 · ordersdbp@gmail.com
+DuBose Photography · 6201 Church Flats Road, Hollywood, SC 29449 · (843) 442-4096 · ordersdbp@gmail.com

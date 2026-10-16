@@ -125,7 +125,18 @@ export interface CompositeOrderItem {
   slots: { slotId: string; proofId: string; label: string }[];
 }
 
-export type OrderItem = PrintOrderItem | CompositeOrderItem;
+/** A print package of one proof (see Packages in content.ts). Every print in it is that pose. */
+export interface PackageOrderItem {
+  kind: 'package';
+  proofId: string;
+  label: string;
+  packageId: string;
+  packageName: string;
+  price: number;
+  quantity: number;
+}
+
+export type OrderItem = PrintOrderItem | CompositeOrderItem | PackageOrderItem;
 
 export interface ProofOrderRequest {
   galleryId: string;
