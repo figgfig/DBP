@@ -75,8 +75,14 @@ export default function ProofViewerScreen() {
       )}
 
       <View style={[styles.topBar, { paddingTop: insets.top + Spacing.sm }]}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={() => router.back()} style={styles.iconButton}>
-          <Ionicons name="close" size={26} color="#FFFFFF" />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Back"
+          hitSlop={12}
+          onPress={() => (router.canGoBack() ? router.back() : router.replace('/proofs'))}
+          style={styles.back}>
+          <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
+          <AppText style={styles.backText}>Back</AppText>
         </Pressable>
         {proof ? (
           <AppText variant="label" style={styles.label}>
@@ -114,8 +120,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.sm,
     paddingBottom: Spacing.sm,
     backgroundColor: 'rgba(0,0,0,0.35)',
+    zIndex: 10,
   },
   iconButton: { padding: Spacing.sm },
+  back: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: Spacing.sm,
+    paddingLeft: Spacing.xs,
+    paddingRight: Spacing.md,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    borderRadius: 999,
+  },
+  backText: { color: '#FFFFFF', fontWeight: '600', fontSize: 16 },
   label: { color: '#FFFFFF' },
   bottomBar: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: Spacing.md, backgroundColor: 'rgba(0,0,0,0.35)', paddingTop: Spacing.sm },
   notice: { color: 'rgba(255,255,255,0.8)' },

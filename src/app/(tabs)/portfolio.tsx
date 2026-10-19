@@ -91,10 +91,12 @@ export default function PortfolioScreen() {
           ) : null}
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Close"
+            accessibilityLabel="Back"
+            hitSlop={12}
             onPress={() => setSelected(null)}
-            style={[styles.close, { top: insets.top + Spacing.sm }]}>
-            <Ionicons name="close" size={28} color="#FFFFFF" />
+            style={[styles.back, { top: insets.top + Spacing.sm, left: insets.left + Spacing.md }]}>
+            <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
+            <AppText style={styles.backText}>Back</AppText>
           </Pressable>
           {selected?.caption ? (
             <View style={[styles.captionBar, { paddingBottom: insets.bottom + Spacing.md }]}>
@@ -116,7 +118,18 @@ const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
   tile: { borderRadius: Radius.sm, overflow: 'hidden', borderWidth: StyleSheet.hairlineWidth },
   viewer: { flex: 1, backgroundColor: '#000000' },
-  close: { position: 'absolute', right: Spacing.md, padding: Spacing.sm, backgroundColor: 'rgba(0,0,0,0.4)', borderRadius: 999 },
+  back: {
+    position: 'absolute',
+    zIndex: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: Spacing.sm,
+    paddingLeft: Spacing.sm,
+    paddingRight: Spacing.md,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    borderRadius: 999,
+  },
+  backText: { color: '#FFFFFF', fontWeight: '600', fontSize: 16 },
   captionBar: { position: 'absolute', left: 0, right: 0, bottom: 0, padding: Spacing.md, backgroundColor: 'rgba(0,0,0,0.5)' },
   captionText: { color: '#FFFFFF' },
 });
